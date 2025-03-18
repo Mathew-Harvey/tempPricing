@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marinestream Pricing Calculator</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --white: #ffffff;
+            --body-bg: #f5f7fa;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--body-bg);
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+        }
+        
+        .slider-value {
+            min-width: 40px;
+            text-align: right;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .results {
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-label {
+            font-weight: 600;
+        }
+        
+        .metric-card {
+            background: linear-gradient(to right, #0056b3, #007bff);
+            color: white;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .metric-title {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-container {
+            height: 350px;
+            margin-top: 20px;
+        }
+        
+        .profit-positive {
+            color: var(--success);
+        }
+        
+        .profit-negative {
+            color: var(--danger);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #004494;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .badge-warning {
+            background-color: var(--warning);
+            color: #212529;
+        }
+        
+        .badge-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .progress {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .progress-bar-danger {
+            background-color: var(--danger);
+        }
+        
+        .progress-bar-warning {
+            background-color: var(--warning);
+        }
+        
+        .progress-bar-success {
+            background-color: var(--success);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Marinestream Pricing Calculator</h1>
+            <p class="description">Adjust variables to see the impact on profitability and break-even analysis</p>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="calculator-grid">
+            <div>
+                <div class="card">
+                    <h2>Cost Structure</h2>
+                    <div class="form-group">
+                        <label for="riseX-fee">Rise-X Monthly Fee (AUD)</label>
+                        <input type="number" id="riseX-fee" value="6750" min="0" step="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="included-events">Included State Transitions</label>
+                        <input type="number" id="included-events" value="1929" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="additional-costs">Additional Monthly Costs (AUD)</label>
+                        <input type="number" id="additional-costs" value="2000" min="0" step="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="prepay-discount">Annual Pre-Payment Discount</label>
+                        <select id="prepay-discount">
+                            <option value="0">None (0%)</option>
+                            <option value="0.17">1 Year (17%)</option>
+                            <option value="0.25">2 Years (25%)</option>
+                            <option value="0.31">3 Years (31%)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Pricing Tiers</h2>
+                    <div class="form-group">
+                        <label for="basic-price">Basic Plan (Up to 5 vessels) (AUD)</label>
+                        <input type="number" id="basic-price" value="100" min="0" step="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="standard-price">Standard Plan (Up to 10 vessels) (AUD)</label>
+                        <input type="number" id="standard-price" value="180" min="0" step="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="premium-price">Premium Plan (Up to 20 vessels) (AUD)</label>
+                        <input type="number" id="premium-price" value="320" min="0" step="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="enterprise-price">Enterprise Plan (Average per customer) (AUD)</label>
+                        <input type="number" id="enterprise-price" value="500" min="0" step="10">
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Customer Usage</h2>
+                    <div class="form-group">
+                        <label for="maintenance-frequency">Days Between Maintenance Events</label>
+                        <input type="number" id="maintenance-frequency" value="60" min="1" max="365">
+                    </div>
+                    <div class="form-group">
+                        <label for="transitions-per-event">State Transitions per Maintenance Event</label>
+                        <input type="number" id="transitions-per-event" value="5" min="1" max="20">
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="card">
+                    <h2>Customer Distribution</h2>
+                    <div class="form-group">
+                        <label for="basic-customers">Basic Plan Customers</label>
+                        <div class="slider-container">
+                            <input type="range" id="basic-customers" min="0" max="200" value="100" class="slider">
+                            <span id="basic-customers-value" class="slider-value">100</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="standard-customers">Standard Plan Customers</label>
+                        <div class="slider-container">
+                            <input type="range" id="standard-customers" min="0" max="100" value="20" class="slider">
+                            <span id="standard-customers-value" class="slider-value">20</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="premium-customers">Premium Plan Customers</label>
+                        <div class="slider-container">
+                            <input type="range" id="premium-customers" min="0" max="50" value="10" class="slider">
+                            <span id="premium-customers-value" class="slider-value">10</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="enterprise-customers">Enterprise Plan Customers</label>
+                        <div class="slider-container">
+                            <input type="range" id="enterprise-customers" min="0" max="20" value="5" class="slider">
+                            <span id="enterprise-customers-value" class="slider-value">5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Financial Summary</h2>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-title">Monthly Revenue</div>
+                            <div class="metric-value" id="total-revenue">$0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-title">Monthly Cost</div>
+                            <div class="metric-value" id="total-cost">$0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-title">Monthly Profit</div>
+                            <div class="metric-value" id="total-profit">$0</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-title">Break-Even Customers</div>
+                            <div class="metric-value" id="break-even">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="results">
+                        <div class="result-item">
+                            <span class="result-label">Total Customers:</span>
+                            <span id="total-customers">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Total State Transitions:</span>
+                            <span id="total-transitions">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Included Transitions:</span>
+                            <span id="included-transitions">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Transition Usage:</span>
+                            <span id="transition-usage">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="transition-progress" style="width: 0%"></div>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Profit Margin:</span>
+                            <span id="profit-margin">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h2>Revenue Breakdown</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Plan</th>
+                                <th>Customers</th>
+                                <th>Price</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Basic</td>
+                                <td id="basic-count">0</td>
+                                <td id="basic-price-display">$0</td>
+                                <td id="basic-revenue">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Standard</td>
+                                <td id="standard-count">0</td>
+                                <td id="standard-price-display">$0</td>
+                                <td id="standard-revenue">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Premium</td>
+                                <td id="premium-count">0</td>
+                                <td id="premium-price-display">$0</td>
+                                <td id="premium-revenue">$0</td>
+                            </tr>
+                            <tr>
+                                <td>Enterprise</td>
+                                <td id="enterprise-count">0</td>
+                                <td id="enterprise-price-display">$0</td>
+                                <td id="enterprise-revenue">$0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer class="container">
+        <p>Marinestream SaaS Pricing Calculator &copy; 2025</p>
+    </footer>
+    
+    <script>
+        // Get all input elements
+        const riseXFeeInput = document.getElementById('riseX-fee');
+        const includedEventsInput = document.getElementById('included-events');
+        const additionalCostsInput = document.getElementById('additional-costs');
+        const prepayDiscountSelect = document.getElementById('prepay-discount');
+        
+        const basicPriceInput = document.getElementById('basic-price');
+        const standardPriceInput = document.getElementById('standard-price');
+        const premiumPriceInput = document.getElementById('premium-price');
+        const enterprisePriceInput = document.getElementById('enterprise-price');
+        
+        const maintenanceFrequencyInput = document.getElementById('maintenance-frequency');
+        const transitionsPerEventInput = document.getElementById('transitions-per-event');
+        
+        const basicCustomersInput = document.getElementById('basic-customers');
+        const standardCustomersInput = document.getElementById('standard-customers');
+        const premiumCustomersInput = document.getElementById('premium-customers');
+        const enterpriseCustomersInput = document.getElementById('enterprise-customers');
+        
+        // Output elements
+        const basicCustomersValue = document.getElementById('basic-customers-value');
+        const standardCustomersValue = document.getElementById('standard-customers-value');
+        const premiumCustomersValue = document.getElementById('premium-customers-value');
+        const enterpriseCustomersValue = document.getElementById('enterprise-customers-value');
+        
+        const totalRevenueOutput = document.getElementById('total-revenue');
+        const totalCostOutput = document.getElementById('total-cost');
+        const totalProfitOutput = document.getElementById('total-profit');
+        const breakEvenOutput = document.getElementById('break-even');
+        
+        const totalCustomersOutput = document.getElementById('total-customers');
+        const totalTransitionsOutput = document.getElementById('total-transitions');
+        const includedTransitionsOutput = document.getElementById('included-transitions');
+        const transitionUsageOutput = document.getElementById('transition-usage');
+        const transitionProgressBar = document.getElementById('transition-progress');
+        const profitMarginOutput = document.getElementById('profit-margin');
+        
+        const basicCountOutput = document.getElementById('basic-count');
+        const standardCountOutput = document.getElementById('standard-count');
+        const premiumCountOutput = document.getElementById('premium-count');
+        const enterpriseCountOutput = document.getElementById('enterprise-count');
+        
+        const basicPriceOutput = document.getElementById('basic-price-display');
+        const standardPriceOutput = document.getElementById('standard-price-display');
+        const premiumPriceOutput = document.getElementById('premium-price-display');
+        const enterprisePriceOutput = document.getElementById('enterprise-price-display');
+        
+        const basicRevenueOutput = document.getElementById('basic-revenue');
+        const standardRevenueOutput = document.getElementById('standard-revenue');
+        const premiumRevenueOutput = document.getElementById('premium-revenue');
+        const enterpriseRevenueOutput = document.getElementById('enterprise-revenue');
+        
+        // Update slider value displays
+        basicCustomersInput.addEventListener('input', () => {
+            basicCustomersValue.textContent = basicCustomersInput.value;
+            calculateResults();
+        });
+        
+        standardCustomersInput.addEventListener('input', () => {
+            standardCustomersValue.textContent = standardCustomersInput.value;
+            calculateResults();
+        });
+        
+        premiumCustomersInput.addEventListener('input', () => {
+            premiumCustomersValue.textContent = premiumCustomersInput.value;
+            calculateResults();
+        });
+        
+        enterpriseCustomersInput.addEventListener('input', () => {
+            enterpriseCustomersValue.textContent = enterpriseCustomersInput.value;
+            calculateResults();
+        });
+        
+        // Update calculations when any input changes
+        const allInputs = [
+            riseXFeeInput, includedEventsInput, additionalCostsInput, prepayDiscountSelect,
+            basicPriceInput, standardPriceInput, premiumPriceInput, enterprisePriceInput,
+            maintenanceFrequencyInput, transitionsPerEventInput,
+            basicCustomersInput, standardCustomersInput, premiumCustomersInput, enterpriseCustomersInput
+        ];
+        
+        allInputs.forEach(input => {
+            input.addEventListener('input', calculateResults);
+            input.addEventListener('change', calculateResults);
+        });
+        
+        // Function to calculate and update results
+        function calculateResults() {
+            // Get all input values
+            const riseXFee = parseFloat(riseXFeeInput.value) || 0;
+            const includedEvents = parseInt(includedEventsInput.value) || 0;
+            const additionalCosts = parseFloat(additionalCostsInput.value) || 0;
+            const prepayDiscount = parseFloat(prepayDiscountSelect.value) || 0;
+            
+            const basicPrice = parseFloat(basicPriceInput.value) || 0;
+            const standardPrice = parseFloat(standardPriceInput.value) || 0;
+            const premiumPrice = parseFloat(premiumPriceInput.value) || 0;
+            const enterprisePrice = parseFloat(enterprisePriceInput.value) || 0;
+            
+            const maintenanceFrequency = parseInt(maintenanceFrequencyInput.value) || 60;
+            const transitionsPerEvent = parseInt(transitionsPerEventInput.value) || 5;
+            
+            const basicCustomers = parseInt(basicCustomersInput.value) || 0;
+            const standardCustomers = parseInt(standardCustomersInput.value) || 0;
+            const premiumCustomers = parseInt(premiumCustomersInput.value) || 0;
+            const enterpriseCustomers = parseInt(enterpriseCustomersInput.value) || 0;
+            
+            // Calculate total costs with potential discount
+            const discountedRiseXFee = riseXFee * (1 - prepayDiscount);
+            const totalCost = discountedRiseXFee + additionalCosts;
+            
+            // Calculate revenue from each tier
+            const basicRevenue = basicCustomers * basicPrice;
+            const standardRevenue = standardCustomers * standardPrice;
+            const premiumRevenue = premiumCustomers * premiumPrice;
+            const enterpriseRevenue = enterpriseCustomers * enterprisePrice;
+            
+            const totalRevenue = basicRevenue + standardRevenue + premiumRevenue + enterpriseRevenue;
+            const totalProfit = totalRevenue - totalCost;
+            const profitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+            
+            // Calculate total customers
+            const totalCustomers = basicCustomers + standardCustomers + premiumCustomers + enterpriseCustomers;
+            
+            // Calculate state transitions
+            const eventsPerMonth = 30 / maintenanceFrequency; // Events per vessel per month
+            
+            const basicTransitions = basicCustomers * 5 * eventsPerMonth * transitionsPerEvent; // 5 vessels per customer
+            const standardTransitions = standardCustomers * 10 * eventsPerMonth * transitionsPerEvent; // 10 vessels per customer
+            const premiumTransitions = premiumCustomers * 20 * eventsPerMonth * transitionsPerEvent; // 20 vessels per customer
+            const enterpriseTransitions = enterpriseCustomers * 25 * eventsPerMonth * transitionsPerEvent; // Assuming avg 25 vessels
+            
+            const totalTransitions = basicTransitions + standardTransitions + premiumTransitions + enterpriseTransitions;
+            const transitionUsage = includedEvents > 0 ? (totalTransitions / includedEvents) * 100 : 0;
+            
+            // Calculate break-even point (for Basic Plan only as a simplification)
+            const breakEven = totalCost > 0 && basicPrice > 0 ? Math.ceil(totalCost / basicPrice) : 0;
+            
+            // Update all outputs
+            totalRevenueOutput.textContent = formatCurrency(totalRevenue);
+            totalCostOutput.textContent = formatCurrency(totalCost);
+            totalProfitOutput.textContent = formatCurrency(totalProfit);
+            totalProfitOutput.className = "metric-value " + (totalProfit >= 0 ? "profit-positive" : "profit-negative");
+            breakEvenOutput.textContent = breakEven;
+            
+            totalCustomersOutput.textContent = totalCustomers;
+            totalTransitionsOutput.textContent = Math.round(totalTransitions).toLocaleString();
+            includedTransitionsOutput.textContent = includedEvents.toLocaleString();
+            transitionUsageOutput.textContent = Math.round(transitionUsage) + "%";
+            
+            // Update progress bar
+            transitionProgressBar.style.width = Math.min(100, transitionUsage) + "%";
+            if (transitionUsage > 90) {
+                transitionProgressBar.className = "progress-bar progress-bar-danger";
+            } else if (transitionUsage > 75) {
+                transitionProgressBar.className = "progress-bar progress-bar-warning";
+            } else {
+                transitionProgressBar.className = "progress-bar progress-bar-success";
+            }
+            
+            profitMarginOutput.textContent = Math.round(profitMargin) + "%";
+            profitMarginOutput.className = profitMargin >= 0 ? "profit-positive" : "profit-negative";
+            
+            // Update revenue breakdown table
+            basicCountOutput.textContent = basicCustomers;
+            standardCountOutput.textContent = standardCustomers;
+            premiumCountOutput.textContent = premiumCustomers;
+            enterpriseCountOutput.textContent = enterpriseCustomers;
+            
+            basicPriceOutput.textContent = formatCurrency(basicPrice);
+            standardPriceOutput.textContent = formatCurrency(standardPrice);
+            premiumPriceOutput.textContent = formatCurrency(premiumPrice);
+            enterprisePriceOutput.textContent = formatCurrency(enterprisePrice);
+            
+            basicRevenueOutput.textContent = formatCurrency(basicRevenue);
+            standardRevenueOutput.textContent = formatCurrency(standardRevenue);
+            premiumRevenueOutput.textContent = formatCurrency(premiumRevenue);
+            enterpriseRevenueOutput.textContent = formatCurrency(enterpriseRevenue);
+        }
+        
+        // Helper function to format currency
+        function formatCurrency(value) {
+            return "$" + value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+        
+        // Initialize calculations
+        calculateResults();
+    </script>
+</body>
+</html>
